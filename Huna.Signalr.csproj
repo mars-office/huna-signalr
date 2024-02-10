@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="8.0.1" />
+    <PackageReference Include="MQTTnet" Version="4.3.3.952" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="env.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
