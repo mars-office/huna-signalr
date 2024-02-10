@@ -5,13 +5,12 @@ ARG TARGETPLATFORM
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
-COPY *.sln .
-COPY ./*.csproj .
-RUN dotnet restore
+COPY ./Huna.Signalr.csproj .
+RUN dotnet restore -p ./Huna.Signalr.csproj
 
 # copy everything else and build app
 COPY . .
-RUN dotnet publish -c Release -o /app --no-restore
+RUN dotnet publish -c Release -o /app -p ./Huna.Signalr.csproj --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
