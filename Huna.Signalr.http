@@ -1,0 +1,6 @@
+@Huna.Signalr_HostAddress = http://localhost:5167
+
+GET {{Huna.Signalr_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
