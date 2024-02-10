@@ -6,16 +6,16 @@ WORKDIR /app
 
 # copy csproj and restore as distinct layers
 COPY ./Huna.Signalr.csproj .
-RUN dotnet restore -p ./Huna.Signalr.csproj
+RUN dotnet restore
 
 # copy everything else and build app
 COPY . .
-RUN dotnet publish -c Release -o /app -p ./Huna.Signalr.csproj --no-restore
+RUN dotnet publish -c Release -o /dist --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app ./
+COPY --from=build /dist ./
 ENTRYPOINT ["dotnet", "Huna.Signalr.dll"]
 
 EXPOSE 3000
