@@ -5,6 +5,7 @@ ARG TARGETPLATFORM
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
+COPY ./Huna.Signalr.sln .
 COPY ./Huna.Signalr.csproj .
 RUN dotnet restore Huna.Signalr.csproj
 
