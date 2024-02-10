@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "template-deployable.fullname" . }}
+  name: {{ include "huna-signalr.fullname" . }}
   labels:
-    {{- include "template-deployable.labels" . | nindent 4 }}
+    {{- include "huna-signalr.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "template-deployable.fullname" . }}
+    name: {{ include "huna-signalr.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

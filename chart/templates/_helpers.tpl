@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "template-deployable.name" -}}
+{{- define "huna-signalr.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "template-deployable.fullname" -}}
+{{- define "huna-signalr.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "template-deployable.chart" -}}
+{{- define "huna-signalr.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "template-deployable.labels" -}}
-helm.sh/chart: {{ include "template-deployable.chart" . }}
-{{ include "template-deployable.selectorLabels" . }}
+{{- define "huna-signalr.labels" -}}
+helm.sh/chart: {{ include "huna-signalr.chart" . }}
+{{ include "huna-signalr.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "template-deployable.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "template-deployable.name" . }}
+{{- define "huna-signalr.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "huna-signalr.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "template-deployable.serviceAccountName" -}}
+{{- define "huna-signalr.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "template-deployable.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "huna-signalr.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

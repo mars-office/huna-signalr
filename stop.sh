@@ -1,2 +1,2 @@
 #!/bin/sh
-telepresence leave releasename-template-deployable
+telepresence leave huna-huna-signalr
