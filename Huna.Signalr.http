@@ -1,6 +1,6 @@
-@Huna.Signalr_HostAddress = http://localhost:5167
+@Huna.Signalr_HostAddress = http://localhost:3000
 
-GET {{Huna.Signalr_HostAddress}}/weatherforecast/
+GET {{Huna.Signalr_HostAddress}}/api/signalr/health
 Accept: application/json
 
 ###
