@@ -18,34 +18,25 @@ namespace Huna.Signalr
             _logger = logger;
             _config = config;
 
-            var tempClientCerts = new X509Certificate2Collection();
-            tempClientCerts.ImportFromPem(_config["EMQX_CLIENT_CRT"]!);
-
             var clientCerts = new X509Certificate2Collection();
+            clientCerts.ImportFromPem(_config["EMQX_CLIENT_CRT"]!);
             var rsaKey = RSA.Create();
-            rsaKey.ImportFromPem(_config["EMQX_CLIENT_KEY"]!);
-            clientCerts.Add(tempClientCerts[0].CopyWithPrivateKey(rsaKey));
+            rsaKey.ImportFromPem(_config["EMQX_CLIENT_KEY"]);
+            clientCerts[0] = clientCerts[0].CopyWithPrivateKey(rsaKey);
 
-            var caCerts = new X509Certificate2Collection();
-            caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
-            caCerts.Add(tempClientCerts[1]);
-            
-
-
-
-            var tlsOptions = new MqttClientTlsOptionsBuilder()
-                .UseTls(true)
-                .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
-                .WithClientCertificates(clientCerts)
-                .WithTrustChain(caCerts)
-                .WithIgnoreCertificateRevocationErrors(true)
-                .Build();
-
+            var caCerts = new X509Certificate2Collection(
+                X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!)
+                );
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
-                .WithCleanSession(true)
                 .WithClientId(Environment.MachineName)
-                .WithTlsOptions(tlsOptions)
+                .WithTlsOptions(new MqttClientTlsOptionsBuilder()
+                    .UseTls(true)
+                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
+                    .WithClientCertificates(clientCerts)
+                    .WithTrustChain(caCerts)
+                    .WithIgnoreCertificateRevocationErrors(true)
+                    .Build())
                 .Build();
 
             _mqttClient = _mqttFactory.CreateMqttClient();
