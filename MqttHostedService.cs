@@ -45,7 +45,6 @@ namespace Huna.Signalr
 
             var tlsOptions = new MqttClientTlsOptionsBuilder()
                 .UseTls(true)
-                .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                 .WithClientCertificates(certs)
                 .WithCertificateValidationHandler((certContext) => {
                     X509Chain chain = new X509Chain();
@@ -55,11 +54,12 @@ namespace Huna.Signalr
                     chain.ChainPolicy.VerificationTime = DateTime.Now;
                     chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 0, 0);
                     chain.ChainPolicy.CustomTrustStore.Add(caCert);
+                    chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
                     chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
 
                     // convert provided X509Certificate to X509Certificate2
                     var x5092 = new X509Certificate2(certContext.Certificate);
-
+                    
                     return chain.Build(x5092);
                 })
                 .Build();
