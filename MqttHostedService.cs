@@ -22,11 +22,10 @@ namespace Huna.Signalr
             var caCerts = new X509Certificate2Collection(caCert);
 
             var splitCerts = _config["EMQX_CLIENT_CRT"]!.Split("-----END CERTIFICATE-----\n");
-            var clientCertPem = splitCerts[0] + "-----END CERTIFICATE-----\n";
             var intermediateCertPem = splitCerts[1] + "-----END CERTIFICATE-----\n";
 
             var clientCert = X509Certificate2.CreateFromPem(
-                new ReadOnlySpan<char>(clientCertPem.ToCharArray()),
+                new ReadOnlySpan<char>(_config["EMQX_CLIENT_CRT"]!.ToCharArray()),
                 new ReadOnlySpan<char>(_config["EMQX_CLIENT_KEY"]!.ToCharArray())
                 );
 
