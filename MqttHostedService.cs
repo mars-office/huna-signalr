@@ -25,7 +25,6 @@ namespace Huna.Signalr
             var rsaKey = RSA.Create();
             rsaKey.ImportFromPem(_config["EMQX_CLIENT_KEY"]!);
             clientCerts.Add(tempClientCerts[0].CopyWithPrivateKey(rsaKey));
-            clientCerts[0].Verify();
 
             var caCerts = new X509Certificate2Collection();
             caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
