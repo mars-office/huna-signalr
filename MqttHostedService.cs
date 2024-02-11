@@ -1,5 +1,6 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Huna.Signalr
@@ -17,56 +18,33 @@ namespace Huna.Signalr
             _logger = logger;
             _config = config;
 
-            var caCert = X509Certificate2.CreateFromPem(
-                new ReadOnlySpan<char>(_config["EMQX_CA_CRT"]!.ToCharArray()));
-            var caCerts = new X509Certificate2Collection(caCert);
+            var tempClientCerts = new X509Certificate2Collection();
+            tempClientCerts.ImportFromPem(_config["EMQX_CLIENT_CRT"]!);
 
-            var splitCerts = _config["EMQX_CLIENT_CRT"]!.Split("-----END CERTIFICATE-----\n");
-            var intermediateCertPem = splitCerts[1] + "-----END CERTIFICATE-----\n";
+            var clientCerts = new X509Certificate2Collection();
+            var rsaKey = RSA.Create();
+            rsaKey.ImportFromPem(_config["EMQX_CLIENT_KEY"]!);
+            clientCerts.Add(tempClientCerts[0].CopyWithPrivateKey(rsaKey));
+            clientCerts[0].Verify();
 
-            var clientCert = X509Certificate2.CreateFromPem(
-                new ReadOnlySpan<char>(_config["EMQX_CLIENT_CRT"]!.ToCharArray()),
-                new ReadOnlySpan<char>(_config["EMQX_CLIENT_KEY"]!.ToCharArray())
-                );
-
-
-            var intermediateCert = X509Certificate2.CreateFromPem(
-                new ReadOnlySpan<char>(intermediateCertPem.ToCharArray())
-                );
-
-            var certs = new X509Certificate2Collection(new[]
-            {
-                
-                clientCert,
-                intermediateCert,
-            });
+            var caCerts = new X509Certificate2Collection();
+            caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
+            caCerts.Add(tempClientCerts[1]);
             
+
+
 
             var tlsOptions = new MqttClientTlsOptionsBuilder()
                 .UseTls(true)
-                .WithClientCertificates(certs)
-                .WithCertificateValidationHandler((certContext) => {
-                    X509Chain chain = new X509Chain();
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.NoFlag;
-                    chain.ChainPolicy.VerificationTime = DateTime.Now;
-                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 0, 0);
-                    chain.ChainPolicy.CustomTrustStore.Add(caCert);
-                    chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
-                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-
-                    // convert provided X509Certificate to X509Certificate2
-                    var x5092 = new X509Certificate2(certContext.Certificate);
-                    
-                    return chain.Build(x5092);
-                })
+                .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
+                .WithClientCertificates(clientCerts)
+                .WithTrustChain(caCerts)
+                .WithIgnoreCertificateRevocationErrors(true)
                 .Build();
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
                 .WithCleanSession(true)
-                .WithCredentials("huna-signalr")
                 .WithClientId(Environment.MachineName)
                 .WithTlsOptions(tlsOptions)
                 .Build();
