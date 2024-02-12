@@ -20,7 +20,7 @@ namespace Huna.Signalr
             var clientCerts = new X509Certificate2Collection
             {
                 new X509Certificate2(
-                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]! + "\n" + _config["EMQX_CA_CRT"], _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
+                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
                     )
             };
 
@@ -38,11 +38,10 @@ namespace Huna.Signalr
 
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
                     .UseTls(true)
-                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
+                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls13)
                     .WithClientCertificates(clientCerts)
                     .WithIgnoreCertificateRevocationErrors(true)
-                    .WithAllowUntrustedCertificates(true)
-                    .WithCertificateValidationHandler(e => true)
+                    .WithTrustChain(caCerts)
                     .Build())
                 .Build();
 
