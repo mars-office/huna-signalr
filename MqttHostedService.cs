@@ -1,6 +1,5 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Huna.Signalr
@@ -8,7 +7,7 @@ namespace Huna.Signalr
     public class MqttHostedService : IHostedService
     {
         private readonly IMqttClient _mqttClient;
-        private readonly MqttFactory _mqttFactory = new MqttFactory();
+        private readonly MqttFactory _mqttFactory = new();
         private readonly ILogger<MqttHostedService> _logger;
         private readonly MqttClientOptions _options;
         private readonly IConfiguration _config;
@@ -42,6 +41,8 @@ namespace Huna.Signalr
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                     .WithClientCertificates(clientCerts)
                     .WithRevocationMode(X509RevocationMode.NoCheck)
+                    .WithAllowUntrustedCertificates(true)
+                    .WithCertificateValidationHandler(e => true)
                     .WithTrustChain(caCerts)
                     .Build())
                 .Build();
