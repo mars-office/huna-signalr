@@ -18,24 +18,31 @@ namespace Huna.Signalr
             _logger = logger;
             _config = config;
 
-            var clientCerts = new X509Certificate2Collection();
-            clientCerts.ImportFromPem(_config["EMQX_CLIENT_CRT"]!);
-            var rsaKey = RSA.Create();
-            rsaKey.ImportFromPem(_config["EMQX_CLIENT_KEY"]);
-            clientCerts[0] = clientCerts[0].CopyWithPrivateKey(rsaKey);
+            var clientCerts = new X509Certificate2Collection
+            {
+                new X509Certificate2(
+                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
+                    )
+            };
 
-            var caCerts = new X509Certificate2Collection(
+
+            var caCerts = new X509Certificate2Collection
+            {
                 X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!)
-                );
+            };
+
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
+                .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311)
                 .WithClientId(Environment.MachineName)
+                .WithCleanSession(true)
+
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
                     .UseTls(true)
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                     .WithClientCertificates(clientCerts)
+                    .WithRevocationMode(X509RevocationMode.NoCheck)
                     .WithTrustChain(caCerts)
-                    .WithIgnoreCertificateRevocationErrors(true)
                     .Build())
                 .Build();
 
