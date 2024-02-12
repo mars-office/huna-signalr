@@ -20,7 +20,7 @@ namespace Huna.Signalr
             var clientCerts = new X509Certificate2Collection
             {
                 new X509Certificate2(
-                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
+                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]! + "\n" + _config["EMQX_CA_CRT"]).Export(X509ContentType.Pfx)
                     )
             };
 
@@ -43,7 +43,6 @@ namespace Huna.Signalr
                     .WithIgnoreCertificateRevocationErrors(true)
                     .WithAllowUntrustedCertificates(true)
                     .WithCertificateValidationHandler(e => true)
-                    .WithTrustChain(caCerts)
                     .Build())
                 .Build();
 
