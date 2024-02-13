@@ -1,5 +1,6 @@
 ﻿using MQTTnet;
 using MQTTnet.Client;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Huna.Signalr
@@ -29,6 +30,16 @@ namespace Huna.Signalr
             {
                 X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!)
             };
+
+            var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            personalStore.Open(OpenFlags.ReadWrite);
+            personalStore.AddRange(clientCerts);
+
+
+            var rootStore = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            rootStore.Open(OpenFlags.ReadWrite);
+            rootStore.AddRange(caCerts);
+
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
