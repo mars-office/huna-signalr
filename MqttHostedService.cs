@@ -26,9 +26,6 @@ namespace Huna.Signalr
             {
                 new X509Certificate2(
                     X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
-                    ),
-                new X509Certificate2(
-                    X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!).Export(X509ContentType.Pfx)
                     )
             };
 
@@ -37,7 +34,6 @@ namespace Huna.Signalr
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311)
                 .WithClientId(Environment.MachineName)
                 .WithCleanSession(true)
-
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
                     .UseTls(true)
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
