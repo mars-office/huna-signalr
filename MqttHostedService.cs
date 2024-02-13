@@ -18,28 +18,20 @@ namespace Huna.Signalr
             _logger = logger;
             _config = config;
 
-            var clientCerts = new X509Certificate2Collection
-            {
-                new X509Certificate2(
-                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
-                    )
-            };
-
-
             var caCerts = new X509Certificate2Collection
             {
                 X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!)
             };
 
-            var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            personalStore.Open(OpenFlags.ReadWrite);
-            personalStore.AddRange(clientCerts);
-
-
-            var rootStore = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
-            rootStore.Open(OpenFlags.ReadWrite);
-            rootStore.AddRange(caCerts);
-
+            var clientCerts = new X509Certificate2Collection
+            {
+                new X509Certificate2(
+                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
+                    ),
+                new X509Certificate2(
+                    X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!).Export(X509ContentType.Pfx)
+                    )
+            };
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
@@ -49,7 +41,7 @@ namespace Huna.Signalr
 
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
                     .UseTls(true)
-                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls13)
+                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                     .WithClientCertificates(clientCerts)
                     .WithIgnoreCertificateRevocationErrors(true)
                     .WithTrustChain(caCerts)
