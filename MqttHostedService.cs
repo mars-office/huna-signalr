@@ -17,17 +17,14 @@ namespace Huna.Signalr
             _logger = logger;
             _config = config;
 
-            var caCerts = new X509Certificate2Collection
-            {
-                X509Certificate2.CreateFromPem(_config["EMQX_CA_CRT"]!)
-            };
+            var caCerts = new X509Certificate2Collection();
+            caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
+            
 
-            var clientCerts = new X509Certificate2Collection
-            {
-                new X509Certificate2(
-                    X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)
-                    )
-            };
+            var clientCerts = new X509Certificate2Collection(new [] {
+                new X509Certificate2(X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)),
+            });
+            
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
@@ -39,6 +36,7 @@ namespace Huna.Signalr
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                     .WithClientCertificates(clientCerts)
                     .WithIgnoreCertificateRevocationErrors(true)
+                    .WithCertificateValidationHandler(e => true)
                     .WithTrustChain(caCerts)
                     .Build())
                 .Build();
@@ -71,7 +69,18 @@ namespace Huna.Signalr
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _mqttClient.ConnectAsync(_options, cancellationToken);
+            if (OperatingSystem.IsLinux())
+            {
+                await File.WriteAllTextAsync("/etc/ssl/certs/mqtt.crt", _config["EMQX_CLIENT_CRT"]!, cancellationToken);
+            }
+            try
+            {
+                await _mqttClient.ConnectAsync(_options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "MQTT ERROR");
+            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
