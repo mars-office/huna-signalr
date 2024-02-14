@@ -36,7 +36,6 @@ namespace Huna.Signalr
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
                     .WithClientCertificates(clientCerts)
                     .WithIgnoreCertificateRevocationErrors(true)
-                    .WithCertificateValidationHandler(e => true)
                     .WithTrustChain(caCerts)
                     .Build())
                 .Build();
