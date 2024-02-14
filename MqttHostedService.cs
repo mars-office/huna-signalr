@@ -64,7 +64,7 @@ namespace Huna.Signalr
             _mqttClient.ConnectedAsync += async e =>
             {
                 var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .WithTopicFilter("mainHub/#", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                     .Build();
                 await _mqttClient.SubscribeAsync(subscribeOptions);
             };
