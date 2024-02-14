@@ -2,6 +2,8 @@
 using MQTTnet;
 using MQTTnet.Client;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Json;
 
 namespace Huna.Signalr
 {
@@ -63,15 +65,38 @@ namespace Huna.Signalr
 
             _mqttClient.ConnectedAsync += async e =>
             {
-                var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub/#", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
-                    .Build();
-                await _mqttClient.SubscribeAsync(subscribeOptions);
+                await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
+                    .WithTopicFilter("mainHub/group/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .Build());
+                await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
+                    .WithTopicFilter("mainHub/user/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .Build());
+                await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
+                    .WithTopicFilter("mainHub/all", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .Build());
             };
 
             _mqttClient.ApplicationMessageReceivedAsync += async e =>
             {
-                await Task.CompletedTask;
+                var splitTopic = e.ApplicationMessage.Topic.Split("/");
+                IClientProxy? clientProxy = null;
+                if (splitTopic[1] == "all")
+                {
+                    clientProxy = _mainHubContext.Clients.All;
+                } else if (splitTopic[1] == "user")
+                {
+                    clientProxy = _mainHubContext.Clients.User(splitTopic[2]);
+                } else if (splitTopic[1] == "group")
+                {
+                    clientProxy = _mainHubContext.Clients.Group(splitTopic[2]);
+                }
+                if (clientProxy != null)
+                {
+                    var payloadString = e.ApplicationMessage.ConvertPayloadToString();
+                    using var ms = new MemoryStream(Encoding.UTF8.GetBytes(payloadString));
+                    var payload = await JsonSerializer.DeserializeAsync<object>(ms);
+                    await clientProxy.SendAsync("receiveData", payload);
+                }
             };
         }
 
