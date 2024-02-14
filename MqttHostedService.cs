@@ -1,4 +1,5 @@
-﻿using MQTTnet;
+﻿using Microsoft.AspNetCore.SignalR;
+using MQTTnet;
 using MQTTnet.Client;
 using System.Security.Cryptography.X509Certificates;
 
@@ -11,20 +12,22 @@ namespace Huna.Signalr
         private readonly ILogger<MqttHostedService> _logger;
         private readonly MqttClientOptions _options;
         private readonly IConfiguration _config;
+        private readonly IHubContext<MainHub> _mainHubContext;
 
-        public MqttHostedService(ILogger<MqttHostedService> logger, IConfiguration config)
+        public MqttHostedService(ILogger<MqttHostedService> logger, IConfiguration config, IHubContext<MainHub> mainHubContext)
         {
             _logger = logger;
             _config = config;
+            _mainHubContext = mainHubContext;
 
             var caCerts = new X509Certificate2Collection();
             caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
-            
 
-            var clientCerts = new X509Certificate2Collection(new [] {
+
+            var clientCerts = new X509Certificate2Collection(new[] {
                 new X509Certificate2(X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)),
             });
-            
+
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
