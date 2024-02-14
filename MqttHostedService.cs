@@ -31,6 +31,7 @@ namespace Huna.Signalr
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311)
                 .WithClientId(Environment.MachineName)
                 .WithCleanSession(true)
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(60))
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
                     .UseTls(true)
                     .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
@@ -60,9 +61,14 @@ namespace Huna.Signalr
             _mqttClient.ConnectedAsync += async e =>
             {
                 var subscribeOptions = new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub")
+                    .WithTopicFilter("mainHub", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
                     .Build();
                 await _mqttClient.SubscribeAsync(subscribeOptions);
+            };
+
+            _mqttClient.ApplicationMessageReceivedAsync += async e =>
+            {
+                await Task.CompletedTask;
             };
         }
 
