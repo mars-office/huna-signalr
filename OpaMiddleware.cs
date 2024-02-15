@@ -57,6 +57,12 @@ namespace Huna.Signalr
 
         public async Task InvokeAsync(HttpContext context)
         {
+            if (context.Request.Path.StartsWithSegments("/api/signalr/health", StringComparison.InvariantCultureIgnoreCase))
+            {
+                await _next(context);
+                return;
+            }
+
             var headersDict = context.Request.Headers.ToDictionary(x => x.Key.ToLower(), x => x.Value.ToString());
 
             if (context.Request.Path.StartsWithSegments("/api/signalr/mainhub", StringComparison.InvariantCultureIgnoreCase) && context.Request.Query.ContainsKey("access_token"))
