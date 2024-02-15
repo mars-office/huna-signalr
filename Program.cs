@@ -19,8 +19,15 @@ public class Program
             rco.Configuration.IncludeDetailInExceptions = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
         });
 
+        builder.Services.AddHttpClient();
+        builder.Services.AddAuthentication(OpaAuthHandler.AuthenticationScheme)
+            .AddScheme<OpaAuthHandlerOptions, OpaAuthHandler>(OpaAuthHandler.AuthenticationScheme, o =>
+            {
+
+            });
 
         builder.Services.AddHostedService<MqttHostedService>();
+
 
         var app = builder.Build();
 
@@ -29,9 +36,12 @@ public class Program
             return "OK";
         }).WithName("Healthcheck");
 
+        app.UseMiddleware<OpaMiddleware>();
+        app.UseAuthentication();
+
         app.MapHub<MainHub>("/api/signalr/mainHub", hcdo =>
         {
-
+            hcdo.CloseOnAuthenticationExpiration = true;
         });
 
         app.Run("http://+:3005");
