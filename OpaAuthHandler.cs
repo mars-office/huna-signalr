@@ -28,7 +28,7 @@ namespace Huna.Signalr
             var issuedUtc = Context.Items["issuedUtc"] as DateTimeOffset?;
             var expiresUtc = Context.Items["expiresUtc"] as DateTimeOffset?;
 
-            var ticket = new AuthenticationTicket(Context.User, new AuthenticationProperties { 
+            var ticket = new AuthenticationTicket(Context.User, new AuthenticationProperties {
                 IssuedUtc = issuedUtc,
                 ExpiresUtc = expiresUtc,
                 AllowRefresh = false,

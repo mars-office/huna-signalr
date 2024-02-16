@@ -33,7 +33,7 @@ namespace Huna.Signalr
 
             _options = new MqttClientOptionsBuilder()
                 .WithTcpServer("huna-emqx", 8883)
-                .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311)
+                .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                 .WithClientId(Environment.MachineName)
                 .WithCleanSession(true)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(60))
@@ -66,13 +66,13 @@ namespace Huna.Signalr
             _mqttClient.ConnectedAsync += async e =>
             {
                 await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub/group/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .WithTopicFilter("$share/main/mainHub/group/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
                     .Build());
                 await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub/user/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .WithTopicFilter("$share/main/mainHub/user/+", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
                     .Build());
                 await _mqttClient.SubscribeAsync(new MqttClientSubscribeOptionsBuilder()
-                    .WithTopicFilter("mainHub/all", MQTTnet.Protocol.MqttQualityOfServiceLevel.ExactlyOnce)
+                    .WithTopicFilter("$share/main/mainHub/all", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
                     .Build());
             };
 
