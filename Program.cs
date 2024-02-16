@@ -1,3 +1,5 @@
+using StackExchange.Redis;
+
 namespace Huna.Signalr;
 
 public class Program
@@ -13,6 +15,7 @@ public class Program
             ho.EnableDetailedErrors = builder.Environment.IsDevelopment() || builder.Environment.IsStaging();
         }).AddStackExchangeRedis("huna-redis:6379", rco =>
         {
+            rco.Configuration.ChannelPrefix = RedisChannel.Literal("HunaSignalr");
             rco.Configuration.AllowAdmin = true;
             rco.Configuration.ClientName = Environment.MachineName;
             rco.Configuration.Password = builder.Configuration["REDIS_PASSWORD"];
