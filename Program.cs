@@ -52,8 +52,6 @@ public class Program
 
             });
 
-        builder.Services.AddHostedService<MqttHostedService>();
-
 
         var app = builder.Build();
 
