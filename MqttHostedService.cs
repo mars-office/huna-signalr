@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using MQTTnet;
 using MQTTnet.Client;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 
@@ -22,27 +21,14 @@ namespace Huna.Signalr
             _config = config;
             _mainHubContext = mainHubContext;
 
-            var caCerts = new X509Certificate2Collection();
-            caCerts.ImportFromPem(_config["EMQX_CA_CRT"]!);
-
-
-            var clientCerts = new X509Certificate2Collection(new[] {
-                new X509Certificate2(X509Certificate2.CreateFromPem(_config["EMQX_CLIENT_CRT"]!, _config["EMQX_CLIENT_KEY"]!).Export(X509ContentType.Pfx)),
-            });
-
-
             _options = new MqttClientOptionsBuilder()
-                .WithTcpServer("huna-emqx", 8883)
+                .WithTcpServer("huna-emqx", 1883)
                 .WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V500)
                 .WithClientId(Environment.MachineName)
                 .WithCleanSession(true)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(60))
                 .WithTlsOptions(new MqttClientTlsOptionsBuilder()
-                    .UseTls(true)
-                    .WithSslProtocols(System.Security.Authentication.SslProtocols.Tls12)
-                    .WithClientCertificates(clientCerts)
-                    .WithIgnoreCertificateRevocationErrors(true)
-                    .WithTrustChain(caCerts)
+                    .UseTls(false)
                     .Build())
                 .Build();
 
@@ -102,10 +88,6 @@ namespace Huna.Signalr
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (OperatingSystem.IsLinux())
-            {
-                await File.WriteAllTextAsync("/etc/ssl/certs/mqtt.crt", _config["EMQX_CLIENT_CRT"]!, cancellationToken);
-            }
             try
             {
                 await _mqttClient.ConnectAsync(_options, cancellationToken);
