@@ -1,3 +1,4 @@
+using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using StackExchange.Redis;
@@ -52,6 +53,20 @@ public class Program
 
             });
 
+
+        builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host("huna-rabbitmq", "/", h =>
+                    {
+                        h.Username("admin");
+                        h.Password(builder.Configuration["RABBITMQ_PASSWORD"]!);
+                    });
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
 
         var app = builder.Build();
 
