@@ -1,3 +1,4 @@
+using Huna.Signalr.Consumers;
 using MassTransit;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -56,6 +57,8 @@ public class Program
 
         builder.Services.AddMassTransit(x =>
             {
+                x.AddConsumer<SendSignalrMessageRequestConsumer>();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host("huna-rabbitmq", "/", h =>
