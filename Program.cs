@@ -67,7 +67,7 @@ public class Program
                         h.Password(builder.Configuration["RABBITMQ_PASSWORD"]!);
                     });
 
-                    cfg.ReceiveEndpoint("signalr", e =>
+                    cfg.ReceiveEndpoint("huna-signalr", e =>
                     {
                         e.PrefetchCount = 1;
                         e.ConfigureConsumer<SendSignalrMessageRequestConsumer>(context);
