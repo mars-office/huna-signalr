@@ -75,6 +75,8 @@ public class Program
                 });
             });
 
+        builder.Services.AddHostedService<TestServuce>();
+
         var app = builder.Build();
 
         app.MapGet("/api/signalr/health", (HttpContext context) =>
