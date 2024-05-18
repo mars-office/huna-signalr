@@ -51,11 +51,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /api/signalr/health
-              port: http
+              port: {{ .Values.service.containerPort }}
           readinessProbe:
             httpGet:
               path: /api/signalr/health
-              port: http
+              port: {{ .Values.service.containerPort }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
