@@ -2,9 +2,9 @@ namespace Huna.Signalr.Contracts
 {
     public class SendSignalrMessageRequest
     {
-        public string? ReceiverType { get; set; }
-        public string? To { get; set; }
-        public object? Payload { get; set; }
+        public required string ReceiverType { get; set; }
+        public required string To { get; set; }
+        public required SignalrMessage Message { get; set; }
 
     }
 }

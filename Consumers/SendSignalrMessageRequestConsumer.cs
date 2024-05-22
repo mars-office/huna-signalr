@@ -23,15 +23,15 @@ namespace Huna.Signalr.Consumers
                 }
                 else if (context.Message.ReceiverType == "user")
                 {
-                    clientProxy = _mainHubContext.Clients.User(context.Message.To!);
+                    clientProxy = _mainHubContext.Clients.User(context.Message.To);
                 }
                 else if (context.Message.ReceiverType == "group")
                 {
-                    clientProxy = _mainHubContext.Clients.Group(context.Message.To!);
+                    clientProxy = _mainHubContext.Clients.Group(context.Message.To);
                 }
                 if (clientProxy != null)
                 {
-                    await clientProxy.SendAsync("receiveData", context.Message.Payload);
+                    await clientProxy.SendAsync("receiveData", context.Message.Message);
                 }
                 _logger.LogInformation("Processed message {id}: to->{to} ({receiverType})", context.MessageId, context.Message.To, context.Message.ReceiverType);
             }
